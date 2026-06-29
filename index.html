@@ -17,7 +17,7 @@
             targetPercent: 45, // אחוז הגירוד הנדרש לחשיפה
             primaryImage: "pic.png.png", // תמונת ברירת המחדל שהועלתה
             secondaryImage: "pic.png",     // תמונת הגיבוי במידה והשם שונה
-            fallbackPlaceholder: "https://placehold.co/1024x1024/047857/ffffff?text=247"
+            fallbackPlaceholder: "https://placehold.co/1024x1024/6366f1/ffffff?text=247"
         };
 
         let imageAttempts = 0;
@@ -38,7 +38,7 @@
     <style>
         body {
             font-family: 'Heebo', sans-serif;
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            background: linear-gradient(135deg, #faf5ff 0%, #f0fdf4 50%, #f0f9ff 100%); /* Soothing pastel gradient (lavender-mint-skyBlue) */
             touch-action: none; /* Prevent scrolling/bouncing on mobile during scratching */
         }
         .canvas-container {
@@ -52,17 +52,17 @@
             left: 0;
             width: 100%;
             height: 100%;
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="%23059669" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>') 16 16, pointer;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="%238b5cf6" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>') 16 16, pointer;
             transition: opacity 0.6s ease-out;
             z-index: 10;
         }
         .code-glow {
-            text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
             animation: pulse-glow 2s infinite alternate;
         }
         @keyframes pulse-glow {
-            0% { transform: scale(1); text-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
-            100% { transform: scale(1.05); text-shadow: 0 0 30px rgba(16, 185, 129, 0.6); }
+            0% { transform: scale(1); text-shadow: 0 0 15px rgba(139, 92, 246, 0.3); }
+            100% { transform: scale(1.05); text-shadow: 0 0 30px rgba(139, 92, 246, 0.6); }
         }
     </style>
 </head>
@@ -70,10 +70,10 @@
 
     <!-- Top Header -->
     <header class="w-full max-w-2xl text-center my-2">
-        <h1 class="text-3xl md:text-5xl font-black text-emerald-800 tracking-tight drop-shadow-sm">
+        <h1 class="text-3xl md:text-5xl font-black text-indigo-900 tracking-tight drop-shadow-sm">
             מגרדים ומגלים את הקוד!
         </h1>
-        <p class="text-sm md:text-base text-emerald-700/90 mt-2 font-medium">
+        <p class="text-sm md:text-base text-indigo-700/80 mt-2 font-medium">
             השתמשו באצבע או בעכבר כדי לגרד את המשטח ולחשוף את קוד המעבר הסודי.
         </p>
     </header>
@@ -81,9 +81,9 @@
     <!-- Main Card container -->
     <main class="w-full max-w-lg flex flex-col items-center justify-center my-auto">
         <!-- Progress Indicator -->
-        <div class="w-full bg-white/80 rounded-full h-5 mb-4 p-0.5 shadow-md border border-emerald-100 flex items-center relative overflow-hidden">
-            <div id="progress-bar" class="bg-gradient-to-l from-emerald-400 to-teal-500 h-full rounded-full transition-all duration-300 w-0"></div>
-            <span id="progress-text" class="absolute inset-0 flex items-center justify-center text-xs font-bold text-emerald-950">
+        <div class="w-full bg-white/80 rounded-full h-5 mb-4 p-0.5 shadow-md border border-indigo-100 flex items-center relative overflow-hidden">
+            <div id="progress-bar" class="bg-gradient-to-l from-purple-300 to-indigo-300 h-full rounded-full transition-all duration-300 w-0"></div>
+            <span id="progress-text" class="absolute inset-0 flex items-center justify-center text-xs font-bold text-indigo-950">
                 התקדמות הגירוד: 0%
             </span>
         </div>
@@ -100,46 +100,40 @@
             <!-- Foreground Scratchable Canvas -->
             <canvas id="scratch-canvas" class="scratch-canvas"></canvas>
 
-            <!-- Success Overlay with CODE 247 inside -->
-            <div id="success-overlay" class="absolute inset-0 bg-emerald-950/90 backdrop-blur-md flex flex-col items-center justify-center text-center p-6 opacity-0 pointer-events-none transition-all duration-700 z-20">
-                <div class="bg-white/95 p-6 md:p-8 rounded-2xl shadow-2xl max-w-sm border-2 border-emerald-300 transform scale-90 transition-transform duration-700" id="success-modal">
+            <!-- Success Overlay with CODE 247 inside (No restart button) -->
+            <div id="success-overlay" class="absolute inset-0 bg-slate-50/95 backdrop-blur-md flex flex-col items-center justify-center text-center p-6 opacity-0 pointer-events-none transition-all duration-700 z-20">
+                <div class="bg-white/95 p-6 md:p-8 rounded-2xl shadow-2xl max-w-sm border-2 border-purple-200 transform scale-90 transition-transform duration-700" id="success-modal">
                     <!-- Success Icon -->
-                    <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-                        <i data-lucide="party-popper" class="w-10 h-10 text-emerald-600"></i>
+                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                        <i data-lucide="party-popper" class="w-10 h-10 text-purple-600"></i>
                     </div>
                     
                     <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 mb-1">כל הכבוד!</h2>
                     <p class="text-sm md:text-base text-slate-600 mb-4">גיליתם את התמונה המסתתרת!</p>
                     
                     <!-- HUGE CODE DISPLAY -->
-                    <div class="bg-emerald-50 border border-emerald-200 rounded-xl py-3 px-6 mb-5">
-                        <span class="text-xs font-bold text-emerald-800 block mb-1">קוד המעבר שלכם:</span>
-                        <div class="text-6xl font-black text-emerald-600 tracking-wider code-glow" id="code-element">
+                    <div class="bg-purple-50/50 border border-purple-100 rounded-xl py-4 px-6 mb-5">
+                        <span class="text-xs font-bold text-purple-800 block mb-1">קוד המעבר שלכם:</span>
+                        <div class="text-6xl font-black text-purple-600 tracking-wider code-glow" id="code-element">
                             247
                         </div>
                     </div>
 
-                    <p class="text-xs md:text-sm text-slate-500 mb-5 font-medium">
+                    <p class="text-sm text-slate-500 font-medium">
                         רשמו את הקוד ועברו לחידה הבאה במרחב הלימודי!
                     </p>
-
-                    <!-- Reset Button -->
-                    <button onclick="resetScratchCard()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 mx-auto">
-                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                        <span>לגרד מחדש</span>
-                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Manual Quick Reveal Button (Highly recommended for Special Ed / Accessibility) -->
-        <button onclick="revealEverything()" class="mt-4 text-xs text-emerald-700/60 hover:text-emerald-700 font-bold underline transition-colors">
+        <!-- Manual Quick Reveal Button -->
+        <button onclick="revealEverything()" class="mt-4 text-xs text-purple-700/60 hover:text-purple-700 font-bold underline transition-colors">
             לא מצליחים לגרד? לחצו כאן לחשיפת הקוד
         </button>
     </main>
 
     <!-- Bottom Footer -->
-    <footer class="text-center text-xs text-emerald-800/50 font-medium py-3">
+    <footer class="text-center text-xs text-purple-800/50 font-medium py-3">
         חדשנות בחינוך • ג'קלין היינה • הדרכה בתקשוב - מחוז דרום
     </footer>
 
@@ -237,18 +231,18 @@
             canvas.width = rect.width || 500;
             canvas.height = rect.height || 500;
 
-            // Draw a high quality silver scratching texture
-            ctx.fillStyle = '#cbd5e1';
+            // Soft pastel silver-lavender scratching texture
+            ctx.fillStyle = '#e2e8f0';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw subtle patterns on the scratch layer
-            ctx.fillStyle = '#94a3b8';
+            // Subtle texture specs
+            ctx.fillStyle = '#cbd5e1';
             for (let i = 0; i < 1500; i++) {
                 ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
             }
 
-            // Draw Instructional Text in Hebrew on the silver layer
-            ctx.fillStyle = '#334155';
+            // Draw Instructional Text in Hebrew on the layer
+            ctx.fillStyle = '#64748b';
             ctx.font = '900 24px Heebo, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -406,7 +400,7 @@
             container.className = "absolute inset-0 pointer-events-none overflow-hidden z-30";
             canvas.parentElement.appendChild(container);
 
-            const colors = ['#f43f5e', '#eab308', '#06b6d4', '#10b981', '#a855f7', '#ff7849'];
+            const colors = ['#a78bfa', '#f472b6', '#38bdf8', '#fb7185', '#c084fc', '#60a5fa']; // Pastel Confetti
 
             for (let i = 0; i < 80; i++) {
                 const particle = document.createElement('div');
