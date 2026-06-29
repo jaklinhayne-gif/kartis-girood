@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משימת כרטיס הגירוד - גילוי הקוד</title>
+    <!-- Tailwind CSS for elegant design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Heebo & Assistant -->
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;800&family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        // הגדרות המשחק - מוגדרות מוקדם כדי למנוע שגיאות טעינה של התמונה בזמן העלייה של הדף
+        const CONFIG = {
+            targetPercent: 45, // אחוז הגירוד הנדרש לחשיפה
+            primaryImage: "pic.png.png", // תמונת ברירת המחדל שהועלתה
+            secondaryImage: "pic.png",     // תמונת הגיבוי במידה והשם שונה
+            fallbackPlaceholder: "https://placehold.co/1024x1024/047857/ffffff?text=247"
+        };
+
+        let imageAttempts = 0;
+
+        // פונקציית גיבוי אוטומטית שמוגדרת מראש כדי למנוע שגיאות ReferenceError
+        function handleImageError(img) {
+            imageAttempts++;
+            if (imageAttempts === 1) {
+                console.log("Trying fallback standard pic.png...");
+                img.src = CONFIG.secondaryImage;
+            } else if (imageAttempts === 2) {
+                console.log("Both local assets missing, using colorful placeholder.");
+                img.src = CONFIG.fallbackPlaceholder;
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            touch-action: none; /* Prevent scrolling/bouncing on mobile during scratching */
+        }
+        .canvas-container {
+            position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .scratch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="%23059669" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>') 16 16, pointer;
+            transition: opacity 0.6s ease-out;
+            z-index: 10;
+        }
+        .code-glow {
+            text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+            animation: pulse-glow 2s infinite alternate;
+        }
+        @keyframes pulse-glow {
+            0% { transform: scale(1); text-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
+            100% { transform: scale(1.05); text-shadow: 0 0 30px rgba(16, 185, 129, 0.6); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-4 md:p-6 text-slate-800">
+
+    <!-- Top Header -->
+    <header class="w-full max-w-2xl text-center my-2">
+        <h1 class="text-3xl md:text-5xl font-black text-emerald-800 tracking-tight drop-shadow-sm">
+            מגרדים ומגלים את הקוד!
+        </h1>
+        <p class="text-sm md:text-base text-emerald-700/90 mt-2 font-medium">
+            השתמשו באצבע או בעכבר כדי לגרד את המשטח ולחשוף את קוד המעבר הסודי.
+        </p>
+    </header>
+
+    <!-- Main Card container -->
+    <main class="w-full max-w-lg flex flex-col items-center justify-center my-auto">
+        <!-- Progress Indicator -->
+        <div class="w-full bg-white/80 rounded-full h-5 mb-4 p-0.5 shadow-md border border-emerald-100 flex items-center relative overflow-hidden">
+            <div id="progress-bar" class="bg-gradient-to-l from-emerald-400 to-teal-500 h-full rounded-full transition-all duration-300 w-0"></div>
+            <span id="progress-text" class="absolute inset-0 flex items-center justify-center text-xs font-bold text-emerald-950">
+                התקדמות הגירוד: 0%
+            </span>
+        </div>
+
+        <!-- The Scratch Card - Square shape to perfectly fit the uploaded image -->
+        <div class="w-full aspect-square bg-white rounded-2xl shadow-2xl border-4 border-white overflow-hidden canvas-container relative transition-transform duration-300 hover:scale-[1.01]">
+            
+            <!-- Underneath Prize Layer -->
+            <div class="absolute inset-0 w-full h-full flex items-center justify-center bg-slate-50 overflow-hidden">
+                <!-- Target Image with automatic fallback for both pic.png.png and pic.png -->
+                <img id="prize-image" src="pic.png.png" alt="משימה" class="w-full h-full object-cover select-none pointer-events-none transition-transform duration-700" onerror="handleImageError(this)">
+            </div>
+
+            <!-- Foreground Scratchable Canvas -->
+            <canvas id="scratch-canvas" class="scratch-canvas"></canvas>
+
+            <!-- Success Overlay with CODE 247 inside -->
+            <div id="success-overlay" class="absolute inset-0 bg-emerald-950/90 backdrop-blur-md flex flex-col items-center justify-center text-center p-6 opacity-0 pointer-events-none transition-all duration-700 z-20">
+                <div class="bg-white/95 p-6 md:p-8 rounded-2xl shadow-2xl max-w-sm border-2 border-emerald-300 transform scale-90 transition-transform duration-700" id="success-modal">
+                    <!-- Success Icon -->
+                    <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                        <i data-lucide="party-popper" class="w-10 h-10 text-emerald-600"></i>
+                    </div>
+                    
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 mb-1">כל הכבוד!</h2>
+                    <p class="text-sm md:text-base text-slate-600 mb-4">גיליתם את התמונה המסתתרת!</p>
+                    
+                    <!-- HUGE CODE DISPLAY -->
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-xl py-3 px-6 mb-5">
+                        <span class="text-xs font-bold text-emerald-800 block mb-1">קוד המעבר שלכם:</span>
+                        <div class="text-6xl font-black text-emerald-600 tracking-wider code-glow" id="code-element">
+                            247
+                        </div>
+                    </div>
+
+                    <p class="text-xs md:text-sm text-slate-500 mb-5 font-medium">
+                        רשמו את הקוד ועברו לחידה הבאה במרחב הלימודי!
+                    </p>
+
+                    <!-- Reset Button -->
+                    <button onclick="resetScratchCard()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 mx-auto">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                        <span>לגרד מחדש</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Quick Reveal Button (Highly recommended for Special Ed / Accessibility) -->
+        <button onclick="revealEverything()" class="mt-4 text-xs text-emerald-700/60 hover:text-emerald-700 font-bold underline transition-colors">
+            לא מצליחים לגרד? לחצו כאן לחשיפת הקוד
+        </button>
+    </main>
+
+    <!-- Bottom Footer -->
+    <footer class="text-center text-xs text-emerald-800/50 font-medium py-3">
+        חדשנות בחינוך • ג'קלין היינה • הדרכה בתקשוב - מחוז דרום
+    </footer>
+
+    <script>
+        let isDrawing = false;
+        let finished = false;
+        let canvas, ctx;
+        let progressBar; // Global reference to progress bar element to avoid ReferenceErrors
+        let scratchCountFallback = 0; // Fallback tracker if getImageData fails due to CORS
+        let isCORSRestricted = false;
+
+        // Sound Synthesis Setup (Web Audio API)
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playVictoryFanfare() {
+            try {
+                initAudio();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const now = audioCtx.currentTime;
+                // High quality synthesized victory fanfare chord sequence (C Major)
+                const notes = [
+                    { f: 261.63, dur: 0.15, delay: 0 },     // C4
+                    { f: 329.63, dur: 0.15, delay: 0.1 },   // E4
+                    { f: 392.00, dur: 0.15, delay: 0.2 },   // G4
+                    { f: 523.25, dur: 0.15, delay: 0.3 },   // C5
+                    { f: 659.25, dur: 0.15, delay: 0.4 },   // E5
+                    { f: 783.99, dur: 0.15, delay: 0.5 },   // G5
+                    { f: 1046.50, dur: 0.6, delay: 0.65 }   // High C6!
+                ];
+
+                notes.forEach(note => {
+                    const osc = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    
+                    osc.type = 'triangle'; // Smooth retro sound
+                    osc.frequency.setValueAtTime(note.f, now + note.delay);
+                    
+                    gainNode.gain.setValueAtTime(0, now + note.delay);
+                    gainNode.gain.linearRampToValueAtTime(0.15, now + note.delay + 0.05);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, now + note.delay + note.dur);
+                    
+                    osc.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    
+                    osc.start(now + note.delay);
+                    osc.stop(now + note.delay + note.dur);
+                });
+            } catch (err) {
+                console.warn("Web Audio not allowed or failed:", err);
+            }
+        }
+
+        function playScratchSound() {
+            try {
+                if (!audioCtx || Math.random() > 0.3) return; // Reduce scratch sound spamming
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(100 + Math.random() * 80, now);
+                
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } catch(e){}
+        }
+
+        // Initialize Canvas & Game State
+        window.onload = function() {
+            canvas = document.getElementById('scratch-canvas');
+            ctx = canvas.getContext('2d', { willReadFrequently: true });
+            progressBar = document.getElementById('progress-bar'); // Securely fetch progress bar reference
+            
+            lucide.createIcons();
+            setupCanvas();
+            setupEvents();
+        }
+
+        function setupCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width || 500;
+            canvas.height = rect.height || 500;
+
+            // Draw a high quality silver scratching texture
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw subtle patterns on the scratch layer
+            ctx.fillStyle = '#94a3b8';
+            for (let i = 0; i < 1500; i++) {
+                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
+            }
+
+            // Draw Instructional Text in Hebrew on the silver layer
+            ctx.fillStyle = '#334155';
+            ctx.font = '900 24px Heebo, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('גרדו כאן לחשיפת הקוד ✨', canvas.width / 2, canvas.height / 2);
+        }
+
+        function setupEvents() {
+            // Mouse Events
+            canvas.addEventListener('mousedown', startScratching);
+            canvas.addEventListener('mousemove', scratchMove);
+            window.addEventListener('mouseup', endScratching);
+
+            // Touch Events
+            canvas.addEventListener('touchstart', (e) => {
+                initAudio();
+                startScratching(e.touches[0]);
+                e.preventDefault();
+            });
+            canvas.addEventListener('touchmove', (e) => {
+                scratchMove(e.touches[0]);
+                e.preventDefault();
+            });
+            window.addEventListener('touchend', endScratching);
+        }
+
+        function startScratching(e) {
+            if (finished) return;
+            initAudio();
+            isDrawing = true;
+            scratch(e);
+        }
+
+        function scratchMove(e) {
+            if (!isDrawing || finished) return;
+            scratch(e);
+        }
+
+        function endScratching() {
+            isDrawing = false;
+        }
+
+        function scratch(e) {
+            const rect = canvas.getBoundingClientRect();
+            // Map exact coordinates accounting for responsive resizing
+            const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            // Adaptive brush size
+            ctx.arc(x, y, 25, 0, Math.PI * 2);
+            ctx.fill();
+
+            playScratchSound();
+            scratchCountFallback++;
+
+            // Throttled progress calculation
+            if (scratchCountFallback % 10 === 0) {
+                calculateProgress();
+            }
+        }
+
+        function calculateProgress() {
+            let percent = 0;
+
+            if (!isCORSRestricted) {
+                try {
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const pixels = imageData.data;
+                    let transparent = 0;
+
+                    // Sample every 8th pixel to speed up performance dramatically
+                    for (let i = 3; i < pixels.length; i += 32) {
+                        if (pixels[i] === 0) {
+                            transparent++;
+                        }
+                    }
+
+                    const totalSampled = pixels.length / 32;
+                    percent = Math.round((transparent / totalSampled) * 100);
+                } catch (err) {
+                    // CORS Restricted (e.g. if loaded via file:// protocol directly in browser)
+                    isCORSRestricted = true;
+                    console.log("CORS/Security restriction detected. Switched to fallback progress system.");
+                }
+            }
+
+            // Fallback progress estimation if browser blocks pixel extraction
+            if (isCORSRestricted) {
+                // Approximate percentage based on the number of scratch actions
+                percent = Math.min(100, Math.round((scratchCountFallback / 120) * 100));
+            }
+
+            if (progressBar) {
+                progressBar.style.width = percent + '%';
+            }
+            document.getElementById('progress-text').textContent = `התקדמות הגירוד: ${percent}%`;
+
+            if (percent >= CONFIG.targetPercent && !finished) {
+                revealEverything();
+            }
+        }
+
+        function revealEverything() {
+            if (finished) return;
+            finished = true;
+            isDrawing = false;
+
+            if (progressBar) {
+                progressBar.style.width = '100%';
+            }
+            document.getElementById('progress-text').textContent = 'הושלם בהצלחה!';
+
+            // Smooth fade-out of canvas
+            canvas.style.opacity = '0';
+            
+            // Trigger Fanfare and Confetti
+            playVictoryFanfare();
+            createConfetti();
+
+            // Display Success Dialog with beautiful scale-in animation
+            setTimeout(() => {
+                const overlay = document.getElementById('success-overlay');
+                overlay.classList.add('visible');
+                overlay.style.opacity = '1';
+                overlay.classList.remove('pointer-events-none');
+                document.getElementById('success-modal').style.transform = 'scale(1)';
+            }, 500);
+        }
+
+        function resetScratchCard() {
+            finished = false;
+            isDrawing = false;
+            scratchCountFallback = 0;
+            
+            // Hide Overlay
+            const overlay = document.getElementById('success-overlay');
+            overlay.classList.remove('visible');
+            overlay.style.opacity = '0';
+            overlay.classList.add('pointer-events-none');
+            document.getElementById('success-modal').style.transform = 'scale(0.9)';
+
+            // Re-draw Canvas
+            canvas.style.opacity = '1';
+            setupCanvas();
+            if (progressBar) {
+                progressBar.style.width = '0%';
+            }
+            document.getElementById('progress-text').textContent = 'התקדמות הגירוד: 0%';
+        }
+
+        // Lightweight synthesized Confetti generator
+        function createConfetti() {
+            const container = document.createElement('div');
+            container.className = "absolute inset-0 pointer-events-none overflow-hidden z-30";
+            canvas.parentElement.appendChild(container);
+
+            const colors = ['#f43f5e', '#eab308', '#06b6d4', '#10b981', '#a855f7', '#ff7849'];
+
+            for (let i = 0; i < 80; i++) {
+                const particle = document.createElement('div');
+                const size = Math.random() * 8 + 6;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                particle.style.position = 'absolute';
+                particle.style.width = size + 'px';
+                particle.style.height = (Math.random() > 0.5 ? size : size / 2) + 'px';
+                particle.style.backgroundColor = color;
+                particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = '-10px';
+                particle.style.transform = `rotate(${Math.random() * 360}deg)`;
+                particle.style.opacity = Math.random() * 0.7 + 0.3;
+
+                container.appendChild(particle);
+
+                // Inline animation loop
+                let posY = -10;
+                let posX = parseFloat(particle.style.left);
+                let speedY = Math.random() * 4 + 2;
+                let speedX = Math.random() * 2 - 1;
+                let rotation = Math.random() * 360;
+                let rotSpeed = Math.random() * 8 - 4;
+
+                const anim = setInterval(() => {
+                    posY += speedY;
+                    posX += speedX;
+                    rotation += rotSpeed;
+
+                    particle.style.top = posY + 'px';
+                    particle.style.left = posX + '%';
+                    particle.style.transform = `rotate(${rotation}deg)`;
+
+                    if (posY > canvas.parentElement.clientHeight + 20) {
+                        clearInterval(anim);
+                        particle.remove();
+                    }
+                }, 16);
+            }
+
+            setTimeout(() => {
+                container.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
